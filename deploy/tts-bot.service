@@ -1,0 +1,38 @@
+; systemd-юнит для запуска без Docker.
+; Установка:
+;   sudo cp deploy/tts-bot.service /etc/systemd/system/
+;   sudo systemctl daemon-reload && sudo systemctl enable --now tts-bot
+; Логи: journalctl -u tts-bot -f
+
+[Unit]
+Description=Telegram TTS bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ttsbot
+Group=ttsbot
+WorkingDirectory=/opt/tts-bot
+EnvironmentFile=/opt/tts-bot/.env
+ExecStart=/opt/tts-bot/.venv/bin/python -m bot.main
+Restart=always
+RestartSec=5
+TimeoutStopSec=20
+
+; Не даём боту доступ к лишнему в системе.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/tts-bot/data
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

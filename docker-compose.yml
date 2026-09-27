@@ -1,0 +1,19 @@
+services:
+  bot:
+    build: .
+    image: tg-tts-bot:latest
+    container_name: tg-tts-bot
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DB_PATH: /app/data/bot.db
+    volumes:
+      - ./data:/app/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    # Бот только исходящие запросы делает — входящие порты не нужны.
+    security_opt:
+      - no-new-privileges:true
